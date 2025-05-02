@@ -9,7 +9,7 @@ export default function useForm(getModelObject) {
         setValues({
             ...values,
             [name]: value
-        })
+        }) // this is the function that updates the object values using setValues function
     }
     const resetForm = () => {
         setValues(getModelObject());

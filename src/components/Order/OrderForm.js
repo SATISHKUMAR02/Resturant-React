@@ -1,22 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Form from '../../layouts/Form';
-import { Grid } from '@mui/material';
+import { ButtonGroup, Grid } from '@mui/material';
 import Input from '../../controls/Input';
 import SelectC from '../../controls/SelectC';
-import Button from '../../controls/Button';
-import useForm from '../../hooks/useForm';
+import { InputAdornment } from '@mui/material';
+import { Button as MuiButton } from '@mui/material';
+import Button from '../../controls/Button'
+import { createAPIEndpoint, ENDPOINTS } from '../../api';
 
 
 export default function OrderForm(props) {
-    const {values,errors,handleInputChange} = props;
+    const { values, errors, handleInputChange } = props;
+    const [customerList, setCustomerList] = useState([]);
+    useEffect(() => {
+        createAPIEndpoint(ENDPOINTS.CUSTOMER).fetchAll()
+          .then(res => {
+            let customerList = res.data.map(item => ({
+              id: item.customerId,
+              title: item.customerName
+            }));
+            customerList = [{ id: 0, title: 'Select' }, ...customerList];
+            setCustomerList(customerList);
+            console.log('Customer List:', customerList); 
+          })
+          .catch(error => console.log(error));
+      }, []);
+
+      useEffect(()=>{
+        let FoodItem
+      })
+      
     return (
         <Form>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Grid item xs={6}>
-                        <Input label="Order Number"
+                        <Input
+
+                            label="Order Number"
                             name="orderNumber"
                             value={values.orderNumber}
+                            InputProps={{
+
+                                startAdornment: (
+                                    <InputAdornment
+                                        position="start">#</InputAdornment>
+                                )
+                            }}
                         />
                     </Grid>
                     <Grid item xs={6}>
@@ -35,58 +65,44 @@ export default function OrderForm(props) {
                     </Grid>
                 </Grid>
                 <Grid item xs={6}>
-                    <SelectC
-
-                        label=""
-                        name="customerId"
-                        options={[
-                            { id: 0, title: "select" },
-                            { id: 1, title: "Customer1" },
-                            { id: 2, title: "Customer2" },
-                            { id: 3, title: "Customer3" },
-                            { id: 4, title: "Customer4" }
-                        ]}
-                        value={values.customerId}
-                        onChange={handleInputChange}
-                    />
+                    {customerList.length > 0 && (
+                        <SelectC
+                            label="Customer"
+                            name="customerId"
+                            options={customerList}
+                            value={values.customerId}
+                            onChange={handleInputChange}
+                            error={errors.customerId}
+                        />
+                    )}
                     <Grid item xs={6}>
                         <Input label="Grand Total"
                             name="gTotal"
                             value={values.gTotal}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment
+                                        position="start">$</InputAdornment>
+                                )
+                            }}
                         />
                     </Grid>
-                </Grid>
-                {/* <Grid item xs={6} >
-                    <Input
-                        label="Order Number"
-                        name="orderNumber"
-                        fullWidth
-                    />
+                    <ButtonGroup >
+                        <MuiButton
+                            size='large'
+                            type='submit'
+                        >SUBMIT</MuiButton>
+                        <MuiButton
+                            size='large'
+                            type='reset '
+                        >RESET</MuiButton>
+                    </ButtonGroup>
+                    <Button
+                        size="large"
+
+                    >ORDERS</Button>
                 </Grid>
 
-                <Grid item xs={6} >
-                    <SelectC
-                        label="Customer"
-                        name="customerId"
-                        options={[
-                            { id: 0, title: "select" },
-                            { id: 1, title: "C1" },
-                            { id: 2, title: "C2" },
-                            { id: 3, title: "C3" },
-                            { id: 4, title: "C4" }
-                        ]}
-                        fullWidth
-                    />
-                </Grid>
-
-                <Grid item xs={6} >
-                    <Input
-                        label="Grand Total"
-                        name="gtotal"
-                        fullWidth
-                    />
-                </Grid>
-            */}
             </Grid>
         </Form>
     );
